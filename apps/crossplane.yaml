@@ -1,0 +1,45 @@
+# ---------------------------------------------------------
+# Proyecto Pléyades - ArgoCD Child Application: Crossplane
+# ---------------------------------------------------------
+# Instala el operador oficial de Crossplane vía Helm Chart
+# en el namespace 'crossplane-system'.
+# ---------------------------------------------------------
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://charts.crossplane.io/stable'
+    chart: crossplane
+    targetRevision: '1.18.2'
+    helm:
+      values: |
+        resourcesCrossplane:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        resourcesRBACManager:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 128Mi
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
