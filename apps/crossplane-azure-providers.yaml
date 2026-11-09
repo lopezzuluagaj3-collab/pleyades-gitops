@@ -1,0 +1,30 @@
+# ---------------------------------------------------------
+# Proyecto Pléyades - ArgoCD Child Application: Crossplane Azure Providers
+# ---------------------------------------------------------
+# Despliega los proveedores Upbound de Azure y la configuración
+# de autenticación federada con Azure Workload Identity (OIDC).
+# ---------------------------------------------------------
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-azure-providers
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/lopezzuluagaj3-collab/pleyades-gitops.git'
+    targetRevision: HEAD
+    path: apps/crossplane
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - SkipDryRunOnMissingResource=true

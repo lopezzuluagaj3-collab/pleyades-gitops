@@ -1,0 +1,31 @@
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: azure-storage-runtime
+  namespace: crossplane-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  serviceAccountTemplate:
+    metadata:
+      name: provider-azure-storage
+      annotations:
+        azure.workload.identity/client-id: "21a02ff7-fb2b-4f4f-94a4-deeadf7f1463"
+        azure.workload.identity/tenant-id: "ac68c654-3629-4eca-8751-b525e872fb99"
+  deploymentTemplate:
+    spec:
+      selector: {}
+      template:
+        metadata:
+          labels:
+            azure.workload.identity/use: "true"
+        spec:
+          containers:
+            - name: package-runtime
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
