@@ -1,0 +1,29 @@
+# ---------------------------------------------------------
+# Proyecto Pléyades - ArgoCD Child Application: Master Database
+# ---------------------------------------------------------
+# Despliega la base de datos PostgreSQL 16 como StatefulSet
+# con almacenamiento persistente en Azure Disk (managed-csi).
+# ---------------------------------------------------------
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: database-postgresql
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/lopezzuluagaj3-collab/pleyades-gitops.git'
+    targetRevision: HEAD
+    path: apps/database
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: database
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
