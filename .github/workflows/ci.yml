@@ -1,0 +1,125 @@
+name: 'GitOps DevSecOps Pipeline - Pleyades'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**.yaml"
+      - "**.yml"
+      - ".yamllint.yml"
+      - ".github/workflows/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**.yaml"
+      - "**.yml"
+      - ".yamllint.yml"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+jobs:
+  # =========================================================
+  # 1. Linting y Formato de YAML (yamllint)
+  # =========================================================
+  yaml-lint:
+    name: '1. YAML Syntax & Linting'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Instalar y ejecutar yamllint
+        run: |
+          pip install yamllint
+          yamllint -c .yamllint.yml .
+
+  # =========================================================
+  # 2. Detección de Fuga de Secretos (Gitleaks)
+  # =========================================================
+  gitleaks:
+    name: '2. Secret Leak Detection (Gitleaks)'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código con historial completo
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+
+      - name: Instalar y ejecutar Gitleaks
+        run: |
+          curl -sSL -o gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.24.0/gitleaks_8.24.0_linux_x64.tar.gz
+          tar -xzf gitleaks.tar.gz
+          sudo mv gitleaks /usr/local/bin/
+          gitleaks detect --source=. --verbose --redact
+
+  # =========================================================
+  # 3. Validación de Esquemas de Kubernetes (Kubeconform)
+  # =========================================================
+  kubeconform:
+    name: '3. Kubernetes Schema Validation'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Instalar Kubeconform
+        run: |
+          curl -sSL -o kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform.tar.gz
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Validar Manifiestos contra Esquemas OpenAPI y Catálogo de CRDs
+        run: |
+          # Valida los manifiestos contra OpenAPI de Kubernetes y esquemas de CRDs (ArgoCD, Crossplane, etc.)
+          kubeconform \
+            -strict \
+            -summary \
+            -ignore-missing-schemas \
+            -kubernetes-version 1.30.0 \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            bootstrap/ apps/
+
+  # =========================================================
+  # 4. Seguridad de Manifiestos y Hardening (Trivy Config)
+  # =========================================================
+  trivy-security:
+    name: '4. Trivy Misconfiguration & Security Scan'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Ejecutar Trivy Config Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
+          output: 'trivy-report.txt'
+
+      - name: Mostrar reporte de Trivy en consola
+        run: |
+          cat trivy-report.txt
+
+      - name: Subir reporte de seguridad como artefacto
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: trivy-security-report
+          path: trivy-report.txt
+          if-no-files-found: warn
+          retention-days: 14
