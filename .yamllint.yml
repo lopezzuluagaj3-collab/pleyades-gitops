@@ -5,6 +5,7 @@ rules:
     max: 180
     level: warning
   document-start: disable
+  new-lines: disable
   truthy:
     check-keys: false
   comments:
