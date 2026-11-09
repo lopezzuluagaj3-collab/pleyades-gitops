@@ -1,0 +1,30 @@
+# ---------------------------------------------------------
+# Proyecto Pléyades - ArgoCD Root Application (App-of-Apps)
+# ---------------------------------------------------------
+# Este manifiesto es el plano de control central (App Madre).
+# Su función es vigilar continuamente el directorio 'apps/' en Git
+# y desplegar de forma autónoma cualquier componente de la plataforma.
+# ---------------------------------------------------------
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pleyades-root-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/lopezzuluagaj3-collab/pleyades-gitops.git'
+    targetRevision: HEAD
+    path: apps
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
