@@ -1,0 +1,85 @@
+# ---------------------------------------------------------
+# Proyecto Pléyades - ArgoCD Child Application: Observability Stack
+# ---------------------------------------------------------
+# Despliega la suite SRE completa (Prometheus Operator, Grafana,
+# Alertmanager y Node Exporter) mediante el Helm Chart oficial
+# kube-prometheus-stack en el namespace 'monitoring'.
+# ---------------------------------------------------------
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring-stack
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://prometheus-community.github.io/helm-charts'
+    chart: kube-prometheus-stack
+    targetRevision: '68.4.4'
+    helm:
+      values: |
+        alertmanager:
+          enabled: true
+          alertmanagerSpec:
+            replicas: 1
+            resources:
+              requests:
+                cpu: 20m
+                memory: 64Mi
+              limits:
+                cpu: 100m
+                memory: 128Mi
+        grafana:
+          enabled: true
+          adminPassword: "prom-operator"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+        prometheus:
+          enabled: true
+          prometheusSpec:
+            replicas: 1
+            retention: 12h
+            resources:
+              requests:
+                cpu: 100m
+                memory: 350Mi
+              limits:
+                cpu: 500m
+                memory: 750Mi
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: managed-csi
+                  accessModes:
+                    - ReadWriteOnce
+                  resources:
+                    requests:
+                      storage: 5Gi
+        nodeExporter:
+          enabled: true
+        kubeStateMetrics:
+          enabled: true
+        kubeControllerManager:
+          enabled: false
+        kubeScheduler:
+          enabled: false
+        kubeEtcd:
+          enabled: false
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true
