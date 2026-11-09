@@ -55,9 +55,11 @@ jobs:
           fetch-depth: 0
 
       - name: Instalar y ejecutar Gitleaks
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -sSL -o gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.24.0/gitleaks_8.24.0_linux_x64.tar.gz
-          tar -xzf gitleaks.tar.gz
+          gh release download v8.24.0 --repo gitleaks/gitleaks --pattern 'gitleaks_8.24.0_linux_x64.tar.gz'
+          tar -xzf gitleaks_8.24.0_linux_x64.tar.gz
           sudo mv gitleaks /usr/local/bin/
           gitleaks detect --source=. --verbose --redact
 
@@ -73,9 +75,11 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Instalar Kubeconform
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -sSL -o kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
-          tar -xzf kubeconform.tar.gz
+          gh release download v0.6.7 --repo yannh/kubeconform --pattern 'kubeconform-linux-amd64.tar.gz'
+          tar -xzf kubeconform-linux-amd64.tar.gz
           sudo mv kubeconform /usr/local/bin/
 
       - name: Validar Manifiestos contra Esquemas OpenAPI y Catálogo de CRDs
