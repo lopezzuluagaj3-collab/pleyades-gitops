@@ -6,3 +6,4 @@ resources:
   - provider-family-azure.yaml
   - provider-azure-storage.yaml
   - provider-config.yaml
+  - test-storage-account.yaml

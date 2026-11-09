@@ -1,0 +1,19 @@
+apiVersion: storage.azure.upbound.io/v1beta1
+kind: Account
+metadata:
+  name: stpleyadesdevtest01
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+    crossplane.io/external-name: stpleyadesdevtest01
+spec:
+  forProvider:
+    resourceGroupName: rg-pleyades-dev
+    location: East US 2
+    accountTier: Standard
+    accountReplicationType: LRS
+    tags:
+      Environment: dev
+      ManagedBy: crossplane
+      Project: pleyades
+  providerConfigRef:
+    name: default
