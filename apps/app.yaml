@@ -1,0 +1,30 @@
+# ---------------------------------------------------------
+# Proyecto Pléyades - ArgoCD Child Application: Microservicio Pleyades App
+# ---------------------------------------------------------
+# Despliega el microservicio core de negocio (pleyades-app)
+# en el namespace 'pleyades-app' con Kustomize, conectándose
+# a PostgreSQL y exponiendo métricas a Prometheus Operator.
+# ---------------------------------------------------------
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pleyades-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/lopezzuluagaj3-collab/pleyades-gitops.git'
+    targetRevision: HEAD
+    path: apps/app
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: pleyades-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
