@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pleyades-app-monitor
+  namespace: monitoring
+  labels:
+    release: monitoring-stack
+    app.kubernetes.io/part-of: pleyades-platform
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pleyades-app
+  namespaceSelector:
+    matchNames:
+      - pleyades-app
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
