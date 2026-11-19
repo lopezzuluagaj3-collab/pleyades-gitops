@@ -28,3 +28,9 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: pleyades-app-secret
+      jsonPointers:
+        - /data
