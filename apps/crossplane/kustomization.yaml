@@ -5,4 +5,5 @@ resources:
   - deployment-runtime-config.yaml
   - provider-family-azure.yaml
   - provider-azure-storage.yaml
+  - provider-azure-dbforpostgresql.yaml
   - provider-config.yaml
