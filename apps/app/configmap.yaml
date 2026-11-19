@@ -5,7 +5,7 @@ metadata:
   namespace: pleyades-app
 data:
   SERVER_PORT: "8080"
-  DB_HOST: "postgres-service.database.svc.cluster.local"
+  DB_HOST: "psql-pleyades-dev-01.postgres.database.azure.com"
   DB_PORT: "5432"
   DB_NAME: "pleyades_db"
-  DB_SSLMODE: "disable"
+  DB_SSLMODE: "require"
