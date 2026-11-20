@@ -4,6 +4,7 @@ namespace: pleyades-app
 
 resources:
   - namespace.yaml
+  - rbac.yaml
   - configmap.yaml
   - secret.yaml
   - service.yaml
