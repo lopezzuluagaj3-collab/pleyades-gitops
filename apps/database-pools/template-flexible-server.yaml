@@ -1,0 +1,66 @@
+# ---------------------------------------------------------
+# Proyecto Pléyades - Plantilla Declarativa de Servidor ADBFP
+# ---------------------------------------------------------
+# Define una instancia gestionada de Azure Database for PostgreSQL
+# Flexible Server en centralus, SKU Standard_B1ms, con TLS forzado,
+# regla de firewall interna de Azure y exportación de credenciales.
+# ---------------------------------------------------------
+apiVersion: dbforpostgresql.azure.upbound.io/v1beta2
+kind: FlexibleServer
+metadata:
+  name: psql-pleyades-dev-02
+  labels:
+    app.kubernetes.io/name: psql-pleyades-dev-02
+    app.kubernetes.io/managed-by: crossplane
+    pleyades.io/pool-tier: standard
+    pleyades.io/pool-capacity: "7"
+spec:
+  providerConfigRef:
+    name: default
+  writeConnectionSecretToRef:
+    name: psql-pleyades-dev-02-conn
+    namespace: crossplane-system
+  forProvider:
+    location: "centralus"
+    version: "16"
+    skuName: "B_Standard_B1ms"
+    storageMb: 32768
+    autoGrowEnabled: true
+    publicNetworkAccessEnabled: true
+    resourceGroupName: "rg-pleyades-dev"
+    administratorLogin: "pleyades_admin"
+    autoGeneratePassword: true
+    administratorPasswordSecretRef:
+      name: psql-pleyades-dev-02-admin-secret
+      namespace: crossplane-system
+      key: password
+---
+apiVersion: dbforpostgresql.azure.upbound.io/v1beta1
+kind: FlexibleServerFirewallRule
+metadata:
+  name: psql-pleyades-dev-02-allow-azure
+  labels:
+    app.kubernetes.io/managed-by: crossplane
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    startIpAddress: "0.0.0.0"
+    endIpAddress: "0.0.0.0"
+    serverIdRef:
+      name: psql-pleyades-dev-02
+---
+apiVersion: dbforpostgresql.azure.upbound.io/v1beta1
+kind: FlexibleServerDatabase
+metadata:
+  name: psql-pleyades-dev-02-pleyades-db
+  labels:
+    app.kubernetes.io/managed-by: crossplane
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    charset: "UTF8"
+    collation: "en_US.utf8"
+    serverIdRef:
+      name: psql-pleyades-dev-02
