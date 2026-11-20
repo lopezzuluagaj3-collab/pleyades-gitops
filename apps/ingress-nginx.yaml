@@ -25,6 +25,7 @@ spec:
           service:
             annotations:
               service.beta.kubernetes.io/azure-dns-label-name: pleyades-sre
+              service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /healthz
           metrics:
             enabled: true
           resources:
