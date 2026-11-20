@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pleyades-app-sa
+  namespace: pleyades-app
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pleyades-app-pool-provisioner
+rules:
+  - apiGroups: ["dbforpostgresql.azure.upbound.io"]
+    resources: ["flexibleservers", "flexibleserverfirewallrules", "flexibleserverdatabases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pleyades-app-pool-provisioner-binding
+subjects:
+  - kind: ServiceAccount
+    name: pleyades-app-sa
+    namespace: pleyades-app
+roleRef:
+  kind: ClusterRole
+  name: pleyades-app-pool-provisioner
+  apiGroup: rbac.authorization.k8s.io
