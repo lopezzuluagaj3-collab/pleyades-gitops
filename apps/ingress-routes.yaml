@@ -1,0 +1,29 @@
+# ---------------------------------------------------------
+# Proyecto Pléyades - ArgoCD Child Application: Ingress Routes (SRE)
+# ---------------------------------------------------------
+# Define los contratos de enrutamiento L7 y nombres DNS (nip.io)
+# para la API de negocio, Grafana y ArgoCD.
+# ---------------------------------------------------------
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ingress-routes
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/lopezzuluagaj3-collab/pleyades-gitops.git'
+    targetRevision: HEAD
+    path: apps/ingress-routes
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - ApplyOutOfSyncOnly=true
