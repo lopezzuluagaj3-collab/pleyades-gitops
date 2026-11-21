@@ -32,7 +32,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/lopezzuluagaj3-collab/pleyades-app:3ef79155bb99fa98b6ac4bc29b410af171af4d6c
+          image: ghcr.io/lopezzuluagaj3-collab/pleyades-app:29f6a8886afbe5cd06b0e738880a82634d93c6bc
           imagePullPolicy: Always
           ports:
             - name: http
