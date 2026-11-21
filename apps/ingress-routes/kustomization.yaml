@@ -1,9 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-  - app-ingress.yaml
-  # Hardening de Seguridad: Interfaces administrativas excluidas de Ingress HTTP plano sin TLS.
-  # Se accede de forma segura mediante 'kubectl port-forward' hasta implementar cert-manager.
-  # - grafana-ingress.yaml
-  # - argo-ingress.yaml
+resources: []
+# Hardening de Seguridad Perimetral (SEC-06 Crítica):
+# El Ingress HTTP plano (puerto 80) queda completamente deshabilitado en todo el clúster.
+# Tanto interfaces de administración (ArgoCD, Grafana) como la API de negocio (login, JWT,
+# credenciales de base de datos) quedan protegidas de intercepción en texto claro.
+# En el entorno de laboratorio/desarrollo, el acceso seguro se realiza exclusivamente mediante
+# túneles 'kubectl port-forward' hasta la provisión de certificados TLS con cert-manager.
+# - app-ingress.yaml
+# - grafana-ingress.yaml
+# - argo-ingress.yaml
