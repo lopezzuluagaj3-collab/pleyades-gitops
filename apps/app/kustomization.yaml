@@ -9,3 +9,5 @@ resources:
   - service.yaml
   - servicemonitor.yaml
   - deployment.yaml
+  - hpa.yaml
+  - pdb.yaml
