@@ -15,6 +15,14 @@ spec:
         app: k6-load-test
     spec:
       restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 12345
+        runAsGroup: 12345
+        fsGroup: 12345
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: k6
           image: grafana/k6:0.56.0
@@ -31,9 +39,16 @@ spec:
             requests:
               cpu: 200m
               memory: 128Mi
+              ephemeral-storage: 64Mi
             limits:
               cpu: 1000m
               memory: 512Mi
+              ephemeral-storage: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
       volumes:
         - name: k6-scripts
           configMap:
