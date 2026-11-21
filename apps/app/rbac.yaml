@@ -4,6 +4,7 @@ metadata:
   name: pleyades-app-sa
   namespace: pleyades-app
 ---
+# ClusterRole con mínimo privilegio: Exclusivamente para CRDs de Crossplane de ámbito cluster
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -12,9 +13,6 @@ rules:
   - apiGroups: ["dbforpostgresql.azure.upbound.io"]
     resources: ["flexibleservers", "flexibleserverfirewallrules", "flexibleserverdatabases"]
     verbs: ["get", "list", "watch", "create", "update", "patch"]
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -27,4 +25,31 @@ subjects:
 roleRef:
   kind: ClusterRole
   name: pleyades-app-pool-provisioner
+  apiGroup: rbac.authorization.k8s.io
+---
+# Role de ámbito de namespace: Restringe la lectura de Secrets exclusivamente al namespace donde
+# Crossplane publica los connection secrets de PostgreSQL, impidiendo la lectura transversal
+# de credenciales del clúster (ArgoCD admin, Grafana, TLS, JWT)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pleyades-app-crossplane-secret-reader
+  namespace: crossplane-system
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pleyades-app-crossplane-secret-reader-binding
+  namespace: crossplane-system
+subjects:
+  - kind: ServiceAccount
+    name: pleyades-app-sa
+    namespace: pleyades-app
+roleRef:
+  kind: Role
+  name: pleyades-app-crossplane-secret-reader
   apiGroup: rbac.authorization.k8s.io

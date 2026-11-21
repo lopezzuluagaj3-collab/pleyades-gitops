@@ -9,3 +9,5 @@ data:
   DB_PORT: "5432"
   DB_NAME: "pleyades_db"
   DB_SSLMODE: "require"
+  DB_MAX_OPEN_CONNS: "5"
+  DB_MAX_IDLE_CONNS: "5"
