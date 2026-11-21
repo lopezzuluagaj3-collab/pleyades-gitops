@@ -3,5 +3,7 @@ kind: Kustomization
 
 resources:
   - app-ingress.yaml
-  - grafana-ingress.yaml
-  - argo-ingress.yaml
+  # Hardening de Seguridad: Interfaces administrativas excluidas de Ingress HTTP plano sin TLS.
+  # Se accede de forma segura mediante 'kubectl port-forward' hasta implementar cert-manager.
+  # - grafana-ingress.yaml
+  # - argo-ingress.yaml
